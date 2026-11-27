@@ -287,7 +287,11 @@ export default function CompaniesPage() {
       )}
 
       {/* Selected Company Modal */}
-      <CompanyModal company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+      <CompanyModal
+        company={selectedCompany}
+        onClose={() => setSelectedCompany(null)}
+        onUpdate={loadCompanies}
+      />
 
       {/* Register New Enterprise Modal */}
       <RegisterCompanyModal

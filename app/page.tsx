@@ -233,7 +233,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Selected Company Modal */}
-      <CompanyModal company={selectedCompany} onClose={() => setSelectedCompany(null)} />
+      <CompanyModal
+        company={selectedCompany}
+        onClose={() => setSelectedCompany(null)}
+        onUpdate={loadData}
+      />
     </div>
   );
 }

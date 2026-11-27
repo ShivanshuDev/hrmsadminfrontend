@@ -11,8 +11,17 @@ export interface IBranch {
   state: string;
   phone: string;
   isHq: boolean;
+  branchType?: string;
+  address?: string;
+  country?: string;
+  postalCode?: string;
+  email?: string;
+  gstin?: string;
+  branchHeadName?: string;
   companyId?: string;
   companyName?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface Company {

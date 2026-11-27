@@ -58,6 +58,49 @@ export const adminService = {
   },
 
   /**
+   * Update Enterprise Details in MongoDB Atlas
+   */
+  async updateCompany(companyId: string, payload: Partial<Company>): Promise<Company> {
+    const res = await apiClient.put<{ success: boolean; data: Company; message: string }>(
+      `/company/${companyId}`,
+      payload
+    );
+    return res.data?.data;
+  },
+
+  /**
+   * Add a New Branch to a Registered Enterprise
+   */
+  async addBranch(companyId: string, branch: any): Promise<{ company: Company; branch: any }> {
+    const res = await apiClient.post<{ success: boolean; data: { company: Company; branch: any }; message: string }>(
+      `/company/${companyId}/branches`,
+      branch
+    );
+    return res.data?.data;
+  },
+
+  /**
+   * Update an Existing Branch of an Enterprise
+   */
+  async updateBranch(companyId: string, branchId: string, branch: any): Promise<{ company: Company; branch: any }> {
+    const res = await apiClient.put<{ success: boolean; data: { company: Company; branch: any }; message: string }>(
+      `/company/${companyId}/branches/${branchId}`,
+      branch
+    );
+    return res.data?.data;
+  },
+
+  /**
+   * Delete a Branch from an Enterprise
+   */
+  async deleteBranch(companyId: string, branchId: string): Promise<any> {
+    const res = await apiClient.delete<{ success: boolean; message: string }>(
+      `/company/${companyId}/branches/${branchId}`
+    );
+    return res.data;
+  },
+
+  /**
    * Consolidate All Branches Across All Registered Companies
    */
   async getAllBranches(): Promise<IBranch[]> {
