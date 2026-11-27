@@ -1,8 +1,34 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Building2, Plus, Loader2, CheckCircle2, AlertCircle, Shield, MapPin, Sparkles } from "lucide-react";
+import {
+  X,
+  Building2,
+  Plus,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  MapPin,
+  Sparkles,
+  Globe,
+  Mail,
+  Phone,
+  Clock,
+  Users,
+  Image as ImageIcon,
+  Trash2,
+  UploadCloud,
+  ChevronRight,
+  ChevronLeft,
+  FileCheck,
+  Check,
+  Copy,
+  KeyRound,
+  ShieldCheck,
+  Edit3,
+} from "lucide-react";
 import { adminService } from "@/services/admin.service";
+import { getAllSectors, getCategoriesForSector } from "@/data/businessSectors";
 
 interface Props {
   isOpen: boolean;
@@ -10,22 +36,30 @@ interface Props {
   onSuccess: () => void;
 }
 
-const SECTOR_OPTIONS = [
-  "5. Information Technology (IT)",
-  "4. Healthcare & Pharmaceuticals",
-  "11. Real Estate & Construction",
-  "6. Banking, Financial Services & Insurance (BFSI)",
-  "1. Agriculture, Dairy & Allied Sectors",
-  "2. Automotive & Heavy Engineering",
-  "3. Energy, Power, Renewables & Utilities",
-  "7. Logistics, Supply Chain, Shipping & Aviation",
-  "8. Retail, E-Commerce, Apparel & FMCG",
-  "9. Hospitality, Tourism, Travel & Aviation",
-  "10. Media, Entertainment, Gaming, Advertising & PR",
-  "12. Manufacturing, Metallurgy, Chemicals & Mining",
-];
+interface BoardMember {
+  name: string;
+  designation: string;
+}
 
-const DEFAULT_COMPANY_IMAGES = [
+interface BranchItem {
+  id: string;
+  branchCompanyId: string;
+  branchName: string;
+  branchCode: string;
+  branchType: string;
+  isHeadquarters: boolean;
+  address: string;
+  city: string;
+  state: string;
+  country: string;
+  postalCode: string;
+  phone: string;
+  email: string;
+  gstin?: string;
+  branchHeadName?: string;
+}
+
+const DEFAULT_DEMO_IMAGES = [
   "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&auto=format&fit=crop&q=80",
   "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&auto=format&fit=crop&q=80",
@@ -33,470 +67,1585 @@ const DEFAULT_COMPANY_IMAGES = [
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80",
 ];
 
+const STEPS = [
+  { step: 1, title: "1. Identity", label: "Legal Identity", icon: Building2 },
+  { step: 2, title: "2. Leadership", label: "Executive Governance", icon: Users },
+  { step: 3, title: "3. Operations", label: "Hours & Rules", icon: Clock },
+  { step: 4, title: "4. Media", label: "Logo & Facility Photos", icon: ImageIcon },
+  { step: 5, title: "5. Branches", label: "Branch Network", icon: MapPin },
+  { step: 6, title: "6. Review & Sign", label: "Audit & Certification", icon: ShieldCheck },
+];
+
 export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
+  const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Form Fields
-  const [form, setForm] = useState({
-    companyName: "",
-    businessSector: SECTOR_OPTIONS[0],
-    businessCategory: "Cloud Infrastructure & Software Engineering",
-    gstNumber: "",
-    panNumber: "",
-    registrationNumber: "",
-    mobileNumber: "",
-    email: "",
-    websiteLink: "",
-    address: "",
-    city: "Bangalore",
-    state: "Karnataka",
-    directorName: "",
-    ceoName: "",
-    ctoName: "",
-    cooName: "",
-    description: "",
-    timing: "09:30 AM - 06:30 PM (Mon-Fri) | 40 Hours Flexible",
-    rulesRegulations: "1. Zero-tolerance harassment policy.\n2. Biometric attendance compliance.\n3. SOC-2 data confidentiality.",
-    superAdminEmail: "",
-    superAdminPassword: "password123",
-    branchName: "Global Technology Headquarters",
-    branchCode: "HQ-01",
-    branchCity: "Bangalore",
-    branchState: "Karnataka",
-    branchPhone: "+91 80 4112 0000",
-  });
+  // Registered credentials modal
+  const [registeredData, setRegisteredData] = useState<{
+    companyName: string;
+    companyId: string;
+    superAdminEmail: string;
+    superAdminPassword: string;
+  } | null>(null);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState(false);
+
+  // Sectors & categories
+  const allSectors = getAllSectors();
+  const [selectedSector, setSelectedSector] = useState("5. Information Technology (IT)");
+  const [selectedCategory, setSelectedCategory] = useState("Software Development");
+
+  // Step 1: Legal Identity
+  const [companyName, setCompanyName] = useState("");
+  const [gstNumber, setGstNumber] = useState("");
+  const [panNumber, setPanNumber] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [websiteLink, setWebsiteLink] = useState("");
+  const [address, setAddress] = useState("");
+
+  // Step 2: Executive Leadership
+  const [directorName, setDirectorName] = useState("");
+  const [ceoName, setCeoName] = useState("");
+  const [ctoName, setCtoName] = useState("");
+  const [cooName, setCooName] = useState("");
+  const [boardMembers, setBoardMembers] = useState<BoardMember[]>([
+    { name: "Dr. Aris Thorne", designation: "Independent Governance Director" },
+    { name: "Pooja Singhania", designation: "Chief Risk & Compliance Director" },
+  ]);
+
+  // Step 3: Operations & Rules
+  const [timing, setTiming] = useState("09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly");
+  const [description, setDescription] = useState("");
+  const [rulesRegulations, setRulesRegulations] = useState(
+    "1. Strict Zero-Tolerance Policy for Workplace Harassment and Discrimination.\n2. Mandatory Attendance Compliance clocked with precision.\n3. Proprietary IP & Non-Disclosure: All algorithmic assets, source code, and enterprise secrets are strictly confidential.\n4. Minimum 48-Hour Notice Policy for scheduled time off.\n5. Robust Device Security and mandatory multi-factor authentication compliance."
+  );
+
+  // Step 4: Visual Media
+  const [companyLogo, setCompanyLogo] = useState("");
+  const [companyImages, setCompanyImages] = useState<string[]>([]);
+  const [newImageUrl, setNewImageUrl] = useState("");
+  const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
+  const [showImageUrlInput, setShowImageUrlInput] = useState(false);
+
+  // Step 5: Multi-Branch Network
+  const [branches, setBranches] = useState<BranchItem[]>([
+    {
+      id: "branch-blr-01",
+      branchCompanyId: "CMP-BLR-001",
+      branchName: "Global Technology Headquarters",
+      branchCode: "BLR-01",
+      branchType: "headquarters",
+      isHeadquarters: true,
+      address: "Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road",
+      city: "Bangalore",
+      state: "Karnataka",
+      country: "India",
+      postalCode: "560103",
+      phone: "+91 80 4123 4567",
+      email: "blr.hq@weardynamite.com",
+      gstin: "29AABCU9603R1ZM",
+      branchHeadName: "Shivanshu Mishra",
+    },
+  ]);
+
+  // Super Admin custom credentials (optional override)
+  const [superAdminEmail, setSuperAdminEmail] = useState("");
+  const [superAdminPassword, setSuperAdminPassword] = useState("password123");
+
+  // Step 6: 4 Compliance Checkboxes
+  const [agreeRules, setAgreeRules] = useState(false);
+  const [agreeStatutory, setAgreeStatutory] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeAuth, setAgreeAuth] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError(null);
+  const availableCategories = getCategoriesForSector(selectedSector);
+
+  const handleSectorChange = (newSector: string) => {
+    setSelectedSector(newSector);
+    const cats = getCategoriesForSector(newSector);
+    if (cats.length > 0) setSelectedCategory(cats[0]);
   };
 
+  // 1-Click Demo Prefill
+  const handleFillDemoData = () => {
+    setError(null);
+    setCompanyName("Dynamite Technologies Private Limited");
+    setSelectedSector("5. Information Technology (IT)");
+    setSelectedCategory("Software Development");
+    setGstNumber("29AABCU9603R1ZM");
+    setPanNumber("AABCU9603R");
+    setRegistrationNumber("CIN-U72200KA2026PTC123456");
+    setMobileNumber("+91 98765 43210");
+    setEmail("contact@weardynamite.com");
+    setWebsiteLink("https://weardynamite.com");
+    setAddress("Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road, Bangalore, Karnataka - 560103");
+
+    setDirectorName("Shivanshu Mishra");
+    setCeoName("Vikram Malhotra");
+    setCtoName("Ananya Rao");
+    setCooName("Rajesh Nambiar");
+    setBoardMembers([
+      { name: "Shivanshu Mishra", designation: "Chairman & Managing Director" },
+      { name: "Dr. Aris Thorne", designation: "Independent Governance Director" },
+      { name: "Pooja Singhania", designation: "Chief Risk & Compliance Director" },
+      { name: "Karthik Narayan", designation: "Non-Executive Board Officer" },
+    ]);
+
+    setTiming("09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly");
+    setDescription(
+      "Dynamite HRMS is an enterprise-tier cloud workforce intelligence and governance platform designed for high-scale organizations across APAC and global territories."
+    );
+    setRulesRegulations(
+      "1. Strict Zero-Tolerance Policy for Workplace Harassment and Discrimination.\n2. Mandatory Attendance Compliance clocked with precision.\n3. Proprietary IP & Non-Disclosure: All algorithmic assets, source code, and enterprise secrets are strictly confidential.\n4. Minimum 48-Hour Notice Policy for scheduled time off.\n5. Robust Device Security and mandatory multi-factor authentication compliance."
+    );
+
+    setCompanyLogo("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80");
+    setCompanyImages(DEFAULT_DEMO_IMAGES);
+
+    setBranches([
+      {
+        id: "branch-blr-01",
+        branchCompanyId: "CMP-BLR-001",
+        branchName: "Bangalore Global Technology HQ",
+        branchCode: "BLR-01",
+        branchType: "headquarters",
+        isHeadquarters: true,
+        address: "Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road",
+        city: "Bangalore",
+        state: "Karnataka",
+        country: "India",
+        postalCode: "560103",
+        phone: "+91 80 4123 4567",
+        email: "blr.hq@weardynamite.com",
+        gstin: "29AABCU9603R1ZM",
+        branchHeadName: "Shivanshu Mishra",
+      },
+      {
+        id: "branch-bom-02",
+        branchCompanyId: "CMP-BOM-002",
+        branchName: "Mumbai Commercial & Executive Hub",
+        branchCode: "BOM-02",
+        branchType: "regional",
+        isHeadquarters: false,
+        address: "One BKC, 8th Floor, G Block, Bandra Kurla Complex",
+        city: "Mumbai",
+        state: "Maharashtra",
+        country: "India",
+        postalCode: "400051",
+        phone: "+91 22 6123 7890",
+        email: "mumbai.office@weardynamite.com",
+        gstin: "27AABCU9603R1ZN",
+        branchHeadName: "Pooja Singhania",
+      },
+      {
+        id: "branch-hyd-03",
+        branchCompanyId: "CMP-HYD-003",
+        branchName: "Hyderabad Cyber Innovation Center",
+        branchCode: "HYD-03",
+        branchType: "rnd",
+        isHeadquarters: false,
+        address: "Cyber Gateway, Level 5, HITEC City, Madhapur",
+        city: "Hyderabad",
+        state: "Telangana",
+        country: "India",
+        postalCode: "500081",
+        phone: "+91 40 4987 6543",
+        email: "hyd.rd@weardynamite.com",
+        gstin: "36AABCU9603R1ZO",
+        branchHeadName: "Ananya Rao",
+      },
+    ]);
+
+    setSuperAdminEmail("superadmin@weardynamite.com");
+    setSuperAdminPassword("password123");
+
+    setAgreeRules(true);
+    setAgreeStatutory(true);
+    setAgreeTerms(true);
+    setAgreeAuth(true);
+  };
+
+  // Image Upload Handlers
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCompanyLogo(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleFacilityUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const readers: Promise<string>[] = files.map(
+      (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(file);
+        })
+    );
+    Promise.all(readers).then((urls) => {
+      setCompanyImages((prev) => [...prev, ...urls]);
+    });
+  };
+
+  const handleAddImageUrl = () => {
+    if (!newImageUrl.trim()) return;
+    setCompanyImages((prev) => [...prev, newImageUrl.trim()]);
+    setNewImageUrl("");
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setCompanyImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Board Member Handlers
+  const handleAddBoardMember = () => {
+    setBoardMembers((prev) => [...prev, { name: "", designation: "" }]);
+  };
+
+  const handleRemoveBoardMember = (index: number) => {
+    if (boardMembers.length <= 1) return;
+    setBoardMembers((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Branch Handlers
+  const handleAddBranch = () => {
+    const num = branches.length + 1;
+    setBranches((prev) => [
+      ...prev,
+      {
+        id: `branch-${Date.now()}`,
+        branchCompanyId: `CMP-LOC-00${num}`,
+        branchName: `Regional Office #${num}`,
+        branchCode: `LOC-0${num}`,
+        branchType: "branch",
+        isHeadquarters: false,
+        address: "",
+        city: "",
+        state: "",
+        country: "India",
+        postalCode: "",
+        phone: "",
+        email: "",
+        gstin: "",
+        branchHeadName: "",
+      },
+    ]);
+  };
+
+  const handleRemoveBranch = (index: number) => {
+    if (branches.length <= 1) return;
+    setBranches((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Step Validation before Proceeding
+  const validateStep = (step: number): boolean => {
+    setError(null);
+    if (step === 1) {
+      if (!companyName.trim()) {
+        setError("Company Legal Name is required");
+        return false;
+      }
+      if (!gstNumber.trim() || gstNumber.trim().length !== 15) {
+        setError("Valid 15-character GSTIN is required");
+        return false;
+      }
+      if (!panNumber.trim() || panNumber.trim().length !== 10) {
+        setError("Valid 10-character PAN number is required");
+        return false;
+      }
+      if (!mobileNumber.trim()) {
+        setError("Corporate contact mobile/phone is required");
+        return false;
+      }
+      if (!email.trim() || !email.includes("@")) {
+        setError("Valid corporate email address is required");
+        return false;
+      }
+      if (!websiteLink.trim()) {
+        setError("Corporate website URL is required");
+        return false;
+      }
+      if (!address.trim()) {
+        setError("Headquarters street address is required");
+        return false;
+      }
+    } else if (step === 2) {
+      if (!directorName.trim()) {
+        setError("Managing Director name is required");
+        return false;
+      }
+      if (!ceoName.trim()) {
+        setError("CEO name is required");
+        return false;
+      }
+      if (!ctoName.trim()) {
+        setError("CTO name is required");
+        return false;
+      }
+      if (!cooName.trim()) {
+        setError("COO name is required");
+        return false;
+      }
+      if (boardMembers.length === 0 || !boardMembers[0].name.trim()) {
+        setError("At least 1 board member is required");
+        return false;
+      }
+    } else if (step === 3) {
+      if (!timing.trim()) {
+        setError("Shift timing and hours are required");
+        return false;
+      }
+      if (!description.trim() || description.trim().length < 20) {
+        setError("Company description must be at least 20 characters");
+        return false;
+      }
+      if (!rulesRegulations.trim() || rulesRegulations.trim().length < 20) {
+        setError("Rules & regulations must be at least 20 characters");
+        return false;
+      }
+    } else if (step === 4) {
+      if (!companyLogo.trim()) {
+        setError("Company Logo is required (Upload or enter image URL)");
+        return false;
+      }
+      if (companyImages.length < 5) {
+        setError(`At least 5 facility photos required (Currently: ${companyImages.length})`);
+        return false;
+      }
+    } else if (step === 5) {
+      if (branches.length === 0) {
+        setError("At least 1 branch (Headquarters) is required");
+        return false;
+      }
+      const hq = branches[0];
+      if (!hq.branchName.trim() || !hq.city.trim() || !hq.state.trim() || !hq.phone.trim()) {
+        setError("Please complete all required fields for Primary Headquarters");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => Math.min(prev + 1, 6));
+    }
+  };
+
+  const handlePrev = () => {
+    setError(null);
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+  };
+
+  // Final Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!agreeRules || !agreeStatutory || !agreeTerms || !agreeAuth) {
+      setError("Please check and accept all 4 statutory and compliance certifications to proceed.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
-    setSuccessMsg(null);
 
     try {
       const payload = {
-        companyName: form.companyName.trim(),
-        businessSector: form.businessSector,
-        businessCategory: form.businessCategory,
-        gstNumber: form.gstNumber.trim().toUpperCase(),
-        panNumber: form.panNumber.trim().toUpperCase(),
-        registrationNumber: form.registrationNumber.trim() || `CIN-${Date.now()}`,
-        mobileNumber: form.mobileNumber.trim(),
-        email: form.email.trim().toLowerCase(),
-        websiteLink: form.websiteLink.trim(),
-        address: `${form.address.trim()}, ${form.city.trim()}, ${form.state.trim()}`,
-        companyLogo: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=150&auto=format&fit=crop&q=80",
-        companyImages: DEFAULT_COMPANY_IMAGES,
-        directorName: form.directorName.trim() || form.ceoName.trim() || "Managing Director",
-        ceoName: form.ceoName.trim() || form.directorName.trim() || "Chief Executive Officer",
-        ctoName: form.ctoName.trim() || "Chief Technology Officer",
-        cooName: form.cooName.trim() || "Chief Operating Officer",
-        boardMembers: [
-          { name: form.directorName.trim() || "Director", designation: "Founder & Director" },
-          { name: form.ceoName.trim() || "Executive", designation: "Chief Executive Officer" },
-        ],
-        description: form.description.trim() || `${form.companyName} is an enterprise leader in ${form.businessSector}.`,
-        timing: form.timing,
-        rulesRegulations: form.rulesRegulations,
-        superAdminEmail: form.superAdminEmail.trim() || form.email.trim(),
-        superAdminPassword: form.superAdminPassword,
-        branches: [
-          {
-            id: `branch-${Date.now()}`,
-            code: form.branchCode.trim().toUpperCase(),
-            name: form.branchName.trim(),
-            city: form.branchCity.trim(),
-            state: form.branchState.trim(),
-            phone: form.branchPhone.trim(),
-            isHq: true,
-          },
-        ],
+        companyName: companyName.trim(),
+        businessSector: selectedSector,
+        businessCategory: selectedCategory,
+        gstNumber: gstNumber.trim().toUpperCase(),
+        panNumber: panNumber.trim().toUpperCase(),
+        registrationNumber: registrationNumber.trim() || `CIN-${Date.now()}`,
+        mobileNumber: mobileNumber.trim(),
+        email: email.trim().toLowerCase(),
+        websiteLink: websiteLink.trim(),
+        address: address.trim(),
+        companyLogo: companyLogo.trim(),
+        companyImages: companyImages,
+        directorName: directorName.trim(),
+        ceoName: ceoName.trim(),
+        ctoName: ctoName.trim(),
+        cooName: cooName.trim(),
+        boardMembers: boardMembers.filter((b) => b.name.trim()),
+        timing: timing.trim(),
+        description: description.trim(),
+        rulesRegulations: rulesRegulations.trim(),
+        superAdminEmail: (superAdminEmail.trim() || email.trim()).toLowerCase(),
+        superAdminPassword: superAdminPassword || "password123",
+        branches: branches.map((b) => ({
+          id: b.id || `branch-${Date.now()}`,
+          code: b.branchCode.trim().toUpperCase(),
+          name: b.branchName.trim(),
+          branchType: b.branchType,
+          isHq: b.isHeadquarters,
+          address: b.address.trim() || address.trim(),
+          city: b.city.trim(),
+          state: b.state.trim(),
+          country: b.country || "India",
+          postalCode: b.postalCode.trim(),
+          phone: b.phone.trim(),
+          email: b.email.trim() || email.trim(),
+          gstin: b.gstin?.trim() || gstNumber.trim(),
+          branchHeadName: b.branchHeadName?.trim() || directorName.trim(),
+        })),
       };
 
       const res = await adminService.registerCompany(payload);
-      setSuccessMsg(res?.message || "Enterprise company successfully registered and provisioned in database!");
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 1500);
+      const companyResult = res?.data?.company || res?.company || {};
+      const creds = res?.data?.superAdmin || res?.superAdmin || {};
+
+      setRegisteredData({
+        companyName: companyResult.companyName || companyName,
+        companyId: companyResult.id || companyResult._id || `comp-${Date.now()}`,
+        superAdminEmail: creds.email || payload.superAdminEmail,
+        superAdminPassword: creds.password || payload.superAdminPassword,
+      });
+
+      onSuccess();
     } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Registration failed. Please check mandatory fields.");
+      console.error("Registration error:", err);
+      setError(err?.response?.data?.message || err?.message || "Registration failed. Verify all mandatory enterprise fields.");
     } finally {
       setLoading(false);
     }
   };
 
+  const copyToClipboard = (text: string, type: "email" | "password") => {
+    navigator.clipboard.writeText(text);
+    if (type === "email") {
+      setCopiedEmail(true);
+      setTimeout(() => setCopiedEmail(false), 2000);
+    } else {
+      setCopiedPassword(true);
+      setTimeout(() => setCopiedPassword(false), 2000);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl text-slate-200">
-        {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-emerald-400 flex items-center justify-center text-white shadow-md">
-              <Building2 className="w-5 h-5" />
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-5xl max-h-[92vh] flex flex-col shadow-2xl text-slate-800 dark:text-slate-100 overflow-hidden">
+        {/* Executive Header Banner */}
+        <div className="p-5 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-r from-indigo-50/80 via-slate-50 to-purple-50/50 dark:from-slate-900 dark:via-indigo-950/20 dark:to-slate-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center text-white shadow-lg shadow-indigo-600/30 shrink-0">
+              <Building2 className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Register New Enterprise</h2>
-              <p className="text-xs text-slate-400">
-                Directly provisions corporate entity in MongoDB Atlas and configures Super Admin in PostgreSQL.
-              </p>
+              <div className="flex items-center space-x-2">
+                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-600 text-white shadow-xs">
+                  Statutory Incorporator
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                  17 Enterprise Corporate Fields
+                </span>
+              </div>
+              <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mt-0.5">
+                Register New Enterprise Entity
+              </h2>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center space-x-2.5">
+            <button
+              type="button"
+              onClick={handleFillDemoData}
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md hover:opacity-95 transition-all cursor-pointer active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 text-amber-200" />
+              <span>⚡ 1-Click Demo Prefill</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Content / Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-6">
+        {/* Stepper Progress Bar */}
+        <div className="px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 overflow-x-auto">
+          <div className="flex items-center justify-between min-w-[620px] gap-2">
+            {STEPS.map((s) => {
+              const isActive = currentStep === s.step;
+              const isPast = currentStep > s.step;
+              return (
+                <button
+                  key={s.step}
+                  type="button"
+                  onClick={() => {
+                    if (s.step < currentStep || validateStep(currentStep)) {
+                      setCurrentStep(s.step);
+                    }
+                  }}
+                  className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                    isActive
+                      ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30 scale-105"
+                      : isPast
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/70"
+                      : "text-slate-400 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  }`}
+                >
+                  <div
+                    className={`w-5 h-5 rounded-lg flex items-center justify-center text-[10px] font-black ${
+                      isActive
+                        ? "bg-white text-indigo-600"
+                        : isPast
+                        ? "bg-emerald-600 text-white"
+                        : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {isPast ? <Check className="w-3 h-3 stroke-[3]" /> : s.step}
+                  </div>
+                  <span className="truncate">{s.title}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Form Body */}
+        <div className="p-6 overflow-y-auto flex-1">
           {error && (
-            <div className="p-3.5 bg-rose-950/60 border border-rose-800/60 rounded-xl flex items-center space-x-2 text-rose-300 text-xs">
+            <div className="mb-5 p-3.5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl flex items-center space-x-2.5 text-rose-600 dark:text-rose-300 text-xs font-semibold">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {successMsg && (
-            <div className="p-3.5 bg-emerald-950/60 border border-emerald-800/60 rounded-xl flex items-center space-x-2 text-emerald-300 text-xs font-semibold">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>{successMsg}</span>
-            </div>
-          )}
-
-          {/* Section 1: Company Legal Identity */}
-          <div className="space-y-4">
-            <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>1. Corporate Identity & Industry</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Company Legal Name *</label>
-                <input
-                  type="text"
-                  required
-                  name="companyName"
-                  placeholder="e.g. Apex Horizon Technologies Pvt Ltd"
-                  value={form.companyName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
+          {/* Success / Registered Credentials Revealed */}
+          {registeredData ? (
+            <div className="p-6 text-center space-y-6">
+              <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/10">
+                <ShieldCheck className="w-8 h-8" />
+              </div>
+              <div>
+                <span className="px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-xs font-bold uppercase tracking-wider">
+                  Incorporation Successful
+                </span>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-2">
+                  {registeredData.companyName}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+                  Corporate entity successfully provisioned into MongoDB Atlas and Root Super Admin credentials generated in PostgreSQL.
+                </p>
               </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Industry Sector *</label>
-                <select
-                  name="businessSector"
-                  value={form.businessSector}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500"
+              {/* Credentials Card */}
+              <div className="max-w-md mx-auto bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 text-left space-y-3.5">
+                <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                  <KeyRound className="w-4 h-4" />
+                  <span>Super Admin Root Access Credentials</span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Company ID</span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{registeredData.companyId}</span>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Super Admin Email</span>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{registeredData.superAdminEmail}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(registeredData.superAdminEmail, "email")}
+                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                    >
+                      {copiedEmail ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+
+                  <div className="p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Root Password</span>
+                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{registeredData.superAdminPassword}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard(registeredData.superAdminPassword, "password")}
+                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500"
+                    >
+                      {copiedPassword ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRegisteredData(null);
+                    onClose();
+                  }}
+                  className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
                 >
-                  {SECTOR_OPTIONS.map((sec) => (
-                    <option key={sec} value={sec}>
-                      {sec}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Business Category / Specialization *</label>
-                <input
-                  type="text"
-                  required
-                  name="businessCategory"
-                  placeholder="e.g. Cloud Robotics, AI Automation"
-                  value={form.businessCategory}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Website URL *</label>
-                <input
-                  type="url"
-                  required
-                  name="websiteLink"
-                  placeholder="https://apexhorizon.ai"
-                  value={form.websiteLink}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
+                  Done & Return to Enterprise Registry
+                </button>
               </div>
             </div>
-          </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* STEP 1: Legal Identity & Statutory Incorporation */}
+              {currentStep === 1 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <Building2 className="w-4 h-4" />
+                    <span>Legal Identity & Operating Industry Classification</span>
+                  </div>
 
-          {/* Section 2: Legal & Contact */}
-          <div className="space-y-4 pt-4 border-t border-slate-800">
-            <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-              <Shield className="w-3.5 h-3.5" />
-              <span>2. Legal Compliance & Contact</span>
-            </h3>
+                  {/* Business Sector & Category Selector */}
+                  <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center space-x-1.5">
+                        <Globe className="w-3.5 h-3.5" />
+                        <span>Adaptive Sector Configuration (50 Enterprise Domains)</span>
+                      </span>
+                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-indigo-200 dark:bg-indigo-900/80 text-indigo-800 dark:text-indigo-200">
+                        {allSectors.length} Sectors Available
+                      </span>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">GSTIN Number *</label>
-                <input
-                  type="text"
-                  required
-                  name="gstNumber"
-                  placeholder="29AAACA1122B1Z1"
-                  value={form.gstNumber}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white uppercase font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Type of Business Sector *</label>
+                        <select
+                          value={selectedSector}
+                          onChange={(e) => handleSectorChange(e.target.value)}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+                        >
+                          {allSectors.map((s) => (
+                            <option key={s.id} value={s.name}>
+                              {s.name} ({s.categories.length} categories)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">PAN Number *</label>
-                <input
-                  type="text"
-                  required
-                  name="panNumber"
-                  placeholder="AAACA1122B"
-                  value={form.panNumber}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white uppercase font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Industry Specialization / Category *</label>
+                        <select
+                          value={selectedCategory}
+                          onChange={(e) => setSelectedCategory(e.target.value)}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-semibold"
+                        >
+                          {availableCategories.map((cat) => (
+                            <option key={cat} value={cat}>
+                              {cat}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Registration / CIN</label>
-                <input
-                  type="text"
-                  name="registrationNumber"
-                  placeholder="CIN-U72200KA2026PTC123456"
-                  value={form.registrationNumber}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                  {/* Primary Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Company Legal Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="e.g. Dynamite Technologies Private Limited"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Corporate Phone *</label>
-                <input
-                  type="text"
-                  required
-                  name="mobileNumber"
-                  placeholder="+91 80 4500 9000"
-                  value={form.mobileNumber}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">15-Digit GSTIN *</label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={15}
+                        value={gstNumber}
+                        onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
+                        placeholder="29AABCU9603R1ZM"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
 
-              <div className="space-y-1 md:col-span-2">
-                <label className="font-semibold text-slate-300">Corporate Email *</label>
-                <input
-                  type="email"
-                  required
-                  name="email"
-                  placeholder="contact@apexhorizon.ai"
-                  value={form.email}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">10-Digit Company PAN *</label>
+                      <input
+                        type="text"
+                        required
+                        maxLength={10}
+                        value={panNumber}
+                        onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
+                        placeholder="AABCU9603R"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
 
-              <div className="space-y-1 md:col-span-3">
-                <label className="font-semibold text-slate-300">Headquarters Address *</label>
-                <input
-                  type="text"
-                  required
-                  name="address"
-                  placeholder="Building 12, Outer Ring Road, Bellandur, Bangalore, Karnataka - 560103"
-                  value={form.address}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-          </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Registration Number / CIN</label>
+                      <input
+                        type="text"
+                        value={registrationNumber}
+                        onChange={(e) => setRegistrationNumber(e.target.value)}
+                        placeholder="CIN-U72200KA2026PTC123456"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
 
-          {/* Section 3: Executive Leadership */}
-          <div className="space-y-4 pt-4 border-t border-slate-800">
-            <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-              <Building2 className="w-3.5 h-3.5" />
-              <span>3. Executive Leadership & Governance</span>
-            </h3>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Official Mobile / Phone *</label>
+                      <div className="relative">
+                        <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          required
+                          value={mobileNumber}
+                          onChange={(e) => setMobileNumber(e.target.value)}
+                          placeholder="+91 98765 43210"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Managing Director *</label>
-                <input
-                  type="text"
-                  required
-                  name="directorName"
-                  placeholder="e.g. Vikramaditya Singhania"
-                  value={form.directorName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Official Corporate Email *</label>
+                      <div className="relative">
+                        <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="contact@weardynamite.com"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">CEO Name *</label>
-                <input
-                  type="text"
-                  required
-                  name="ceoName"
-                  placeholder="e.g. Vikramaditya Singhania"
-                  value={form.ceoName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Corporate Website URL *</label>
+                      <div className="relative">
+                        <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="url"
+                          required
+                          value={websiteLink}
+                          onChange={(e) => setWebsiteLink(e.target.value)}
+                          placeholder="https://weardynamite.com"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
 
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">CTO Name</label>
-                <input
-                  type="text"
-                  name="ctoName"
-                  placeholder="e.g. Sameer Kulkarni"
-                  value={form.ctoName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">COO Name</label>
-                <input
-                  type="text"
-                  name="cooName"
-                  placeholder="e.g. Shalini Nair"
-                  value={form.cooName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 4: Primary Headquarters Branch */}
-          <div className="space-y-4 pt-4 border-t border-slate-800">
-            <h3 className="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center space-x-1.5">
-              <MapPin className="w-3.5 h-3.5" />
-              <span>4. Primary Headquarters Branch</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-              <div className="space-y-1 md:col-span-2">
-                <label className="font-semibold text-slate-300">HQ Branch Name *</label>
-                <input
-                  type="text"
-                  required
-                  name="branchName"
-                  value={form.branchName}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Branch Code *</label>
-                <input
-                  type="text"
-                  required
-                  name="branchCode"
-                  value={form.branchCode}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">City *</label>
-                <input
-                  type="text"
-                  required
-                  name="branchCity"
-                  value={form.branchCity}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 5: Super Admin Account */}
-          <div className="space-y-4 pt-4 border-t border-slate-800">
-            <h3 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center space-x-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>5. Super Admin Access Credentials</span>
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Super Admin Login Email</label>
-                <input
-                  type="email"
-                  name="superAdminEmail"
-                  placeholder="superadmin@apexhorizon.ai"
-                  value={form.superAdminEmail}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                />
-                <span className="text-[10px] text-slate-400">Defaults to corporate email if left blank</span>
-              </div>
-
-              <div className="space-y-1">
-                <label className="font-semibold text-slate-300">Initial Password</label>
-                <input
-                  type="text"
-                  required
-                  name="superAdminPassword"
-                  value={form.superAdminPassword}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-white font-mono focus:outline-none focus:border-indigo-500"
-                />
-                <span className="text-[10px] text-slate-400">Default: password123</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Submit Buttons */}
-          <div className="pt-6 border-t border-slate-800 flex items-center justify-end space-x-3">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-600/25 flex items-center space-x-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Registering Enterprise in Database...</span>
-                </>
-              ) : (
-                <>
-                  <Plus className="w-4 h-4" />
-                  <span>Register Enterprise Now</span>
-                </>
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Registered Headquarters Address *</label>
+                      <div className="relative">
+                        <MapPin className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3" />
+                        <input
+                          type="text"
+                          required
+                          value={address}
+                          onChange={(e) => setAddress(e.target.value)}
+                          placeholder="Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road, Bangalore, Karnataka - 560103"
+                          className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               )}
-            </button>
-          </div>
-        </form>
+
+              {/* STEP 2: Executive Leadership & Governance */}
+              {currentStep === 2 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <Users className="w-4 h-4" />
+                    <span>Executive Leadership & Board of Governance (5 Mandatory Leadership Fields)</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Managing Director (MD) Name *</label>
+                      <input
+                        type="text"
+                        required
+                        value={directorName}
+                        onChange={(e) => setDirectorName(e.target.value)}
+                        placeholder="e.g. Shivanshu Mishra"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Chief Executive Officer (CEO) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={ceoName}
+                        onChange={(e) => setCeoName(e.target.value)}
+                        placeholder="e.g. Vikram Malhotra"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Chief Technology Officer (CTO) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={ctoName}
+                        onChange={(e) => setCtoName(e.target.value)}
+                        placeholder="e.g. Ananya Rao"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Chief Operating Officer (COO) *</label>
+                      <input
+                        type="text"
+                        required
+                        value={cooName}
+                        onChange={(e) => setCooName(e.target.value)}
+                        placeholder="e.g. Rajesh Nambiar"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Board Members Table */}
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase">
+                          Board of Directors Roster *
+                        </span>
+                        <p className="text-[10px] text-slate-400">At least 1 board member required</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleAddBoardMember}
+                        className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-100 transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add Member</span>
+                      </button>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      {boardMembers.map((member, idx) => (
+                        <div key={idx} className="flex items-center space-x-2 text-xs">
+                          <input
+                            type="text"
+                            required
+                            placeholder="Full Legal Name"
+                            value={member.name}
+                            onChange={(e) => {
+                              const updated = [...boardMembers];
+                              updated[idx].name = e.target.value;
+                              setBoardMembers(updated);
+                            }}
+                            className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                          />
+                          <input
+                            type="text"
+                            required
+                            placeholder="Governance Designation"
+                            value={member.designation}
+                            onChange={(e) => {
+                              const updated = [...boardMembers];
+                              updated[idx].designation = e.target.value;
+                              setBoardMembers(updated);
+                            }}
+                            className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                          />
+                          {boardMembers.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBoardMember(idx)}
+                              className="p-2 text-slate-400 hover:text-rose-500 transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 3: Operations & Regulations */}
+              {currentStep === 3 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <Clock className="w-4 h-4" />
+                    <span>Operational Timings, Enterprise Description & Governance Rules</span>
+                  </div>
+
+                  <div className="space-y-4 text-xs">
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">
+                        Operating Timings & Shift Hours *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={timing}
+                        onChange={(e) => setTiming(e.target.value)}
+                        placeholder="09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly"
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">
+                        Company Profile & Overview Description *
+                      </label>
+                      <textarea
+                        rows={3}
+                        required
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Provide a comprehensive profile of company operations, vision, and core industry..."
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                      />
+                      <span className="text-[10px] text-slate-400">Min 20 characters</span>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">
+                        Company Rules, Regulations & Employment Policies *
+                      </label>
+                      <textarea
+                        rows={5}
+                        required
+                        value={rulesRegulations}
+                        onChange={(e) => setRulesRegulations(e.target.value)}
+                        placeholder="Enter workplace code of conduct, non-disclosure, attendance policies, and compliance norms..."
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
+                      />
+                      <span className="text-[10px] text-slate-400">Min 20 characters</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: Visual Brand Media & Facility Gallery */}
+              {currentStep === 4 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                      <ImageIcon className="w-4 h-4" />
+                      <span>Visual Identity & Workplace Gallery (Minimum 5 Images Required)</span>
+                    </div>
+                    <span
+                      className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full ${
+                        companyImages.length >= 5
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400"
+                          : "bg-amber-100 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400"
+                      }`}
+                    >
+                      {companyImages.length} / 5 Images {companyImages.length >= 5 ? "✓ Validated" : "(Need at least 5)"}
+                    </span>
+                  </div>
+
+                  {/* 1. Logo */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Company Official Brand Logo *</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowLogoUrlInput(!showLogoUrlInput)}
+                        className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {showLogoUrlInput ? "Use File Upload" : "Or enter Image URL"}
+                      </button>
+                    </div>
+
+                    {companyLogo ? (
+                      <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl">
+                        <div className="flex items-center space-x-3">
+                          <img
+                            src={companyLogo}
+                            alt="Logo preview"
+                            className="w-12 h-12 object-contain rounded-xl bg-white p-1 border border-slate-200 dark:border-slate-700"
+                          />
+                          <div>
+                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
+                              Corporate Logo Attached
+                            </span>
+                            <span className="text-[10px] text-emerald-500 font-semibold flex items-center space-x-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>Ready for Database & Dossier PDF</span>
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setCompanyLogo("")}
+                          className="px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs font-semibold hover:bg-rose-100 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : showLogoUrlInput ? (
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/... (image URL)"
+                        value={companyLogo}
+                        onChange={(e) => setCompanyLogo(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500"
+                      />
+                    ) : (
+                      <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-200 dark:border-indigo-900 rounded-2xl bg-indigo-50/30 dark:bg-indigo-950/20 cursor-pointer hover:bg-indigo-50/60 transition-colors">
+                        <UploadCloud className="w-8 h-8 text-indigo-500 mb-1" />
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                          Click to Upload Corporate Logo
+                        </span>
+                        <span className="text-[10px] text-slate-400">PNG, JPG, SVG or WebP</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* 2. Facility Gallery */}
+                  <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center justify-between text-xs">
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">
+                        Facility & Workplace Gallery Images (Min 5) *
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => setShowImageUrlInput(!showImageUrlInput)}
+                        className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        {showImageUrlInput ? "Use File Upload" : "Or enter URL"}
+                      </button>
+                    </div>
+
+                    <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-indigo-200 dark:border-indigo-900 rounded-2xl bg-indigo-50/30 dark:bg-indigo-950/20 cursor-pointer hover:bg-indigo-50/60 transition-colors">
+                      <UploadCloud className="w-8 h-8 text-indigo-500 mb-1" />
+                      <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                        Select Workplace & Campus Photos
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Upload 5 or more photos (Offices, Reception, Boardrooms, Labs)
+                      </span>
+                      <input type="file" multiple accept="image/*" className="hidden" onChange={handleFacilityUpload} />
+                    </label>
+
+                    {showImageUrlInput && (
+                      <div className="flex space-x-2 text-xs">
+                        <input
+                          type="url"
+                          placeholder="https://images.unsplash.com/... (paste image link)"
+                          value={newImageUrl}
+                          onChange={(e) => setNewImageUrl(e.target.value)}
+                          className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddImageUrl}
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-500"
+                        >
+                          Add
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Preview Gallery Grid */}
+                    {companyImages.length > 0 && (
+                      <div className="mt-3">
+                        <div className="flex items-center justify-between text-xs mb-2">
+                          <span className="font-bold text-slate-700 dark:text-slate-300">
+                            Attached Gallery ({companyImages.length} Photos)
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setCompanyImages([])}
+                            className="text-[10px] text-rose-500 hover:underline"
+                          >
+                            Clear All
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                          {companyImages.map((img, idx) => (
+                            <div
+                              key={idx}
+                              className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 aspect-video bg-slate-100 dark:bg-slate-800"
+                            >
+                              <img src={img} alt={`Facility ${idx + 1}`} className="w-full h-full object-cover" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveImage(idx)}
+                                  className="p-1 rounded-lg bg-rose-600 text-white hover:bg-rose-500"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                              <span className="absolute bottom-1 left-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold">
+                                #{idx + 1}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 5: Multi-Branch Network */}
+              {currentStep === 5 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                      <MapPin className="w-4 h-4" />
+                      <span>Corporate Multi-Branch Network ({branches.length} Registered)</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddBranch}
+                      className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:bg-indigo-100"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Additional Branch</span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    {branches.map((b, idx) => (
+                      <div
+                        key={b.id || idx}
+                        className={`p-4 rounded-2xl border text-xs space-y-3 ${
+                          b.isHeadquarters
+                            ? "bg-indigo-50/30 dark:bg-indigo-950/10 border-indigo-200 dark:border-indigo-900/60"
+                            : "bg-slate-50/70 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-700/80 pb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black">
+                              {idx + 1}
+                            </span>
+                            <span className="font-bold text-slate-900 dark:text-white">
+                              {b.branchName || `Branch #${idx + 1}`}
+                            </span>
+                            {b.isHeadquarters ? (
+                              <span className="px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold">
+                                ★ Global Headquarters
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 text-[10px] font-semibold uppercase">
+                                {b.branchType}
+                              </span>
+                            )}
+                            <span className="font-mono text-[10px] text-indigo-500 font-bold">[{b.branchCompanyId}]</span>
+                          </div>
+
+                          {!b.isHeadquarters && branches.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveBranch(idx)}
+                              className="text-rose-500 hover:text-rose-600 text-[11px] flex items-center space-x-1"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Remove</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Branch Company ID *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.branchCompanyId}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].branchCompanyId = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-mono text-indigo-600 dark:text-indigo-400 font-bold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Branch Name *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.branchName}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].branchName = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-semibold"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Branch Code *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.branchCode}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].branchCode = e.target.value.toUpperCase();
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-mono uppercase"
+                            />
+                          </div>
+
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Street Address *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.address}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].address = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">City *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.city}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].city = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">State *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.state}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].state = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Contact Phone *</label>
+                            <input
+                              type="text"
+                              required
+                              value={b.phone}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].phone = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Branch Head Name</label>
+                            <input
+                              type="text"
+                              value={b.branchHeadName || ""}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].branchHeadName = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 6: Review, Agreement Acceptance & Statutory Certification */}
+              {currentStep === 6 && (
+                <div className="space-y-5 animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                      <ShieldCheck className="w-4 h-4" />
+                      <span>Review Registration Dossier & Legal Certification</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center space-x-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>All 5 Prior Sections Verified</span>
+                    </span>
+                  </div>
+
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    {/* Identity Snapshot */}
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span className="font-bold uppercase text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
+                          <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                          <span>Corporate Identity</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(1)}
+                          className="text-[10px] font-bold text-indigo-500 hover:underline flex items-center space-x-1"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        {companyLogo ? (
+                          <img
+                            src={companyLogo}
+                            alt="Logo"
+                            className="w-10 h-10 rounded-xl object-contain bg-white border border-slate-200 dark:border-slate-700 p-1 shrink-0"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                            <Building2 className="w-5 h-5" />
+                          </div>
+                        )}
+                        <div>
+                          <span className="font-bold text-slate-900 dark:text-white block">{companyName || "—"}</span>
+                          <span className="text-[10px] text-indigo-500 font-semibold">{selectedSector} • {selectedCategory}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1 text-[11px] text-slate-600 dark:text-slate-300 pt-1">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">GSTIN:</span>
+                          <span className="font-mono font-bold">{gstNumber || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">PAN:</span>
+                          <span className="font-mono font-bold">{panNumber || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Email:</span>
+                          <span>{email || "—"}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Website:</span>
+                          <span className="text-indigo-500">{websiteLink || "—"}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Leadership Snapshot */}
+                    <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-2">
+                        <span className="font-bold uppercase text-slate-700 dark:text-slate-300 flex items-center space-x-1.5">
+                          <Users className="w-3.5 h-3.5 text-indigo-500" />
+                          <span>Executive Leadership</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentStep(2)}
+                          className="text-[10px] font-bold text-indigo-500 hover:underline flex items-center space-x-1"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-[11px]">
+                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <span className="text-[10px] text-slate-400 block">MD</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{directorName || "—"}</span>
+                        </div>
+                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <span className="text-[10px] text-slate-400 block">CEO</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{ceoName || "—"}</span>
+                        </div>
+                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <span className="text-[10px] text-slate-400 block">CTO</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{ctoName || "—"}</span>
+                        </div>
+                        <div className="p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
+                          <span className="text-[10px] text-slate-400 block">COO</span>
+                          <span className="font-bold text-slate-800 dark:text-slate-200 truncate block">{cooName || "—"}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-slate-500">
+                        Board Members: {boardMembers.map((b) => b.name).filter(Boolean).join(", ")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Super Admin Credentials Setup */}
+                  <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/60 space-y-3">
+                    <div className="flex items-center space-x-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Root Super Admin Credentials Configuration</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      <div className="space-y-1">
+                        <label className="font-semibold text-slate-700 dark:text-slate-300">Super Admin Login Email</label>
+                        <input
+                          type="email"
+                          placeholder={email || "superadmin@domain.com"}
+                          value={superAdminEmail}
+                          onChange={(e) => setSuperAdminEmail(e.target.value)}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                        />
+                        <span className="text-[10px] text-slate-400">Defaults to corporate email if empty</span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="font-semibold text-slate-700 dark:text-slate-300">Initial Password</label>
+                        <input
+                          type="text"
+                          required
+                          value={superAdminPassword}
+                          onChange={(e) => setSuperAdminPassword(e.target.value)}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-mono"
+                        />
+                        <span className="text-[10px] text-slate-400">Default: password123</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Mandatory Legal & Compliance Checkboxes */}
+                  <div className="p-4 rounded-2xl bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3 text-xs">
+                    <span className="font-bold text-slate-800 dark:text-slate-200 uppercase flex items-center space-x-1.5">
+                      <FileCheck className="w-4 h-4 text-indigo-500" />
+                      <span>Statutory Agreement & Compliance Certifications (4 Mandatory Sign-Offs)</span>
+                    </span>
+
+                    <div className="space-y-2.5">
+                      <label className="flex items-start space-x-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agreeRules}
+                          onChange={(e) => setAgreeRules(e.target.checked)}
+                          className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-slate-700 dark:text-slate-300">
+                          <strong>Rule 1 • Operational Governance Acceptance:</strong> I have reviewed and agree to adopt and enforce the stated Company Rules, Regulations, and Operating Standards across all corporate branches and workforce members.
+                        </span>
+                      </label>
+
+                      <label className="flex items-start space-x-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agreeStatutory}
+                          onChange={(e) => setAgreeStatutory(e.target.checked)}
+                          className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-slate-700 dark:text-slate-300">
+                          <strong>Rule 2 • Statutory Identity Certification:</strong> I certify under legal penalty that the corporate identity ({companyName || "Company"}), 15-digit GSTIN ({gstNumber || "GSTIN"}), 10-digit PAN ({panNumber || "PAN"}), and registered address are authentic, legally incorporated, and valid.
+                        </span>
+                      </label>
+
+                      <label className="flex items-start space-x-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agreeTerms}
+                          onChange={(e) => setAgreeTerms(e.target.checked)}
+                          className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-slate-700 dark:text-slate-300">
+                          <strong>Rule 3 • Master Enterprise Agreement:</strong> I accept the Dynamite HRMS Enterprise Master Services Agreement, Data Security Protocol, Multi-Branch Data Isolation Standards, and Automatic System Audit Trail Logging.
+                        </span>
+                      </label>
+
+                      <label className="flex items-start space-x-2.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={agreeAuth}
+                          onChange={(e) => setAgreeAuth(e.target.checked)}
+                          className="mt-0.5 rounded text-indigo-600 focus:ring-indigo-500"
+                        />
+                        <span className="text-slate-700 dark:text-slate-300">
+                          <strong>Rule 4 • Super Admin Access Authorization:</strong> I authorize the generation of Root Super Admin credentials and direct database provisioning in MongoDB Atlas and Supabase PostgreSQL.
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Footer */}
+              <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={currentStep === 1 ? onClose : handlePrev}
+                  className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex items-center space-x-1 cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>{currentStep === 1 ? "Cancel" : "Previous Step"}</span>
+                </button>
+
+                {currentStep < 6 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center space-x-1.5 transition-all cursor-pointer"
+                  >
+                    <span>Continue to Step {currentStep + 1}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={loading || !agreeRules || !agreeStatutory || !agreeTerms || !agreeAuth}
+                    className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-extrabold shadow-xl shadow-emerald-600/30 flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Provisioning Enterprise in Database...</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Confirm & Provision Enterprise Now</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );
