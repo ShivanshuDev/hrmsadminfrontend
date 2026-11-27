@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { Database, HardDrive, RefreshCw, Zap } from "lucide-react";
+import { Database, HardDrive, RefreshCw, Zap, Sun, Moon } from "lucide-react";
 import { adminService } from "@/services/admin.service";
 import { InfrastructureStatus } from "@/types/dashboard";
+import { useTheme } from "@/components/theme/ThemeProvider";
 
 export function Header() {
   const pathname = usePathname();
+  const { theme, toggleTheme } = useTheme();
   const [infra, setInfra] = useState<InfrastructureStatus | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -38,7 +40,7 @@ export function Header() {
         </span>
       </div>
 
-      {/* Live Infrastructure Badges */}
+      {/* Live Infrastructure Badges & Controls */}
       <div className="flex items-center space-x-3 text-xs">
         {/* PostgreSQL Indicator */}
         <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700/60 text-slate-300">
@@ -70,6 +72,19 @@ export function Header() {
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin text-indigo-400" : ""}`} />
           {infra?.latencyMs && <span className="text-[11px]">{infra.latencyMs}ms</span>}
+        </button>
+
+        {/* Dark / Light Mode Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-300 hover:text-amber-400 transition-colors flex items-center justify-center"
+          title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {theme === "dark" ? (
+            <Sun className="w-4 h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-4 h-4 text-indigo-400" />
+          )}
         </button>
       </div>
     </header>

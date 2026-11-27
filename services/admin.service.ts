@@ -50,6 +50,14 @@ export const adminService = {
   },
 
   /**
+   * Register a New Enterprise directly into MongoDB Atlas and provision Super Admin
+   */
+  async registerCompany(payload: any): Promise<any> {
+    const res = await apiClient.post<{ success: boolean; data: any; message: string }>("/company/register", payload);
+    return res.data;
+  },
+
+  /**
    * Consolidate All Branches Across All Registered Companies
    */
   async getAllBranches(): Promise<IBranch[]> {
