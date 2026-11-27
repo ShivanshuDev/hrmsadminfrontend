@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   MapPin,
-  Sparkles,
   Globe,
   Mail,
   Phone,
@@ -59,14 +58,6 @@ interface BranchItem {
   branchHeadName?: string;
 }
 
-const DEFAULT_DEMO_IMAGES = [
-  "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=800&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800&auto=format&fit=crop&q=80",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&auto=format&fit=crop&q=80",
-];
-
 const STEPS = [
   { step: 1, title: "1. Identity", label: "Legal Identity", icon: Building2 },
   { step: 2, title: "2. Leadership", label: "Executive Governance", icon: Users },
@@ -91,12 +82,12 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedPassword, setCopiedPassword] = useState(false);
 
-  // Sectors & categories
+  // Dynamic Sectors & categories
   const allSectors = getAllSectors();
-  const [selectedSector, setSelectedSector] = useState("5. Information Technology (IT)");
-  const [selectedCategory, setSelectedCategory] = useState("Software Development");
+  const [selectedSector, setSelectedSector] = useState(allSectors[0]?.name || "");
+  const [selectedCategory, setSelectedCategory] = useState(allSectors[0]?.categories[0] || "");
 
-  // Step 1: Legal Identity
+  // Step 1: Legal Identity (100% Dynamic - Clean Empty States)
   const [companyName, setCompanyName] = useState("");
   const [gstNumber, setGstNumber] = useState("");
   const [panNumber, setPanNumber] = useState("");
@@ -106,56 +97,53 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
   const [websiteLink, setWebsiteLink] = useState("");
   const [address, setAddress] = useState("");
 
-  // Step 2: Executive Leadership
+  // Step 2: Executive Leadership (100% Dynamic - Clean Empty States)
   const [directorName, setDirectorName] = useState("");
   const [ceoName, setCeoName] = useState("");
   const [ctoName, setCtoName] = useState("");
   const [cooName, setCooName] = useState("");
   const [boardMembers, setBoardMembers] = useState<BoardMember[]>([
-    { name: "Dr. Aris Thorne", designation: "Independent Governance Director" },
-    { name: "Pooja Singhania", designation: "Chief Risk & Compliance Director" },
+    { name: "", designation: "" },
   ]);
 
-  // Step 3: Operations & Rules
-  const [timing, setTiming] = useState("09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly");
+  // Step 3: Operations & Rules (100% Dynamic - Clean Empty States)
+  const [timing, setTiming] = useState("");
   const [description, setDescription] = useState("");
-  const [rulesRegulations, setRulesRegulations] = useState(
-    "1. Strict Zero-Tolerance Policy for Workplace Harassment and Discrimination.\n2. Mandatory Attendance Compliance clocked with precision.\n3. Proprietary IP & Non-Disclosure: All algorithmic assets, source code, and enterprise secrets are strictly confidential.\n4. Minimum 48-Hour Notice Policy for scheduled time off.\n5. Robust Device Security and mandatory multi-factor authentication compliance."
-  );
+  const [rulesRegulations, setRulesRegulations] = useState("");
 
-  // Step 4: Visual Media
+  // Step 4: Visual Media (100% Dynamic - Clean Empty States)
   const [companyLogo, setCompanyLogo] = useState("");
   const [companyImages, setCompanyImages] = useState<string[]>([]);
   const [newImageUrl, setNewImageUrl] = useState("");
   const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
   const [showImageUrlInput, setShowImageUrlInput] = useState(false);
 
-  // Step 5: Multi-Branch Network
+  // Step 5: Multi-Branch Network (100% Dynamic - Clean Empty States)
   const [branches, setBranches] = useState<BranchItem[]>([
     {
-      id: "branch-blr-01",
-      branchCompanyId: "CMP-BLR-001",
-      branchName: "Global Technology Headquarters",
-      branchCode: "BLR-01",
+      id: "branch-hq-01",
+      branchCompanyId: "",
+      branchName: "",
+      branchCode: "",
       branchType: "headquarters",
       isHeadquarters: true,
-      address: "Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road",
-      city: "Bangalore",
-      state: "Karnataka",
+      address: "",
+      city: "",
+      state: "",
       country: "India",
-      postalCode: "560103",
-      phone: "+91 80 4123 4567",
-      email: "blr.hq@weardynamite.com",
-      gstin: "29AABCU9603R1ZM",
-      branchHeadName: "Shivanshu Mishra",
+      postalCode: "",
+      phone: "",
+      email: "",
+      gstin: "",
+      branchHeadName: "",
     },
   ]);
 
-  // Super Admin custom credentials (optional override)
+  // Step 6: Super Admin Custom Credentials (Clean Empty State)
   const [superAdminEmail, setSuperAdminEmail] = useState("");
-  const [superAdminPassword, setSuperAdminPassword] = useState("password123");
+  const [superAdminPassword, setSuperAdminPassword] = useState("");
 
-  // Step 6: 4 Compliance Checkboxes
+  // Compliance Checkboxes
   const [agreeRules, setAgreeRules] = useState(false);
   const [agreeStatutory, setAgreeStatutory] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
@@ -169,105 +157,6 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
     setSelectedSector(newSector);
     const cats = getCategoriesForSector(newSector);
     if (cats.length > 0) setSelectedCategory(cats[0]);
-  };
-
-  // 1-Click Demo Prefill
-  const handleFillDemoData = () => {
-    setError(null);
-    setCompanyName("Dynamite Technologies Private Limited");
-    setSelectedSector("5. Information Technology (IT)");
-    setSelectedCategory("Software Development");
-    setGstNumber("29AABCU9603R1ZM");
-    setPanNumber("AABCU9603R");
-    setRegistrationNumber("CIN-U72200KA2026PTC123456");
-    setMobileNumber("+91 98765 43210");
-    setEmail("contact@weardynamite.com");
-    setWebsiteLink("https://weardynamite.com");
-    setAddress("Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road, Bangalore, Karnataka - 560103");
-
-    setDirectorName("Shivanshu Mishra");
-    setCeoName("Vikram Malhotra");
-    setCtoName("Ananya Rao");
-    setCooName("Rajesh Nambiar");
-    setBoardMembers([
-      { name: "Shivanshu Mishra", designation: "Chairman & Managing Director" },
-      { name: "Dr. Aris Thorne", designation: "Independent Governance Director" },
-      { name: "Pooja Singhania", designation: "Chief Risk & Compliance Director" },
-      { name: "Karthik Narayan", designation: "Non-Executive Board Officer" },
-    ]);
-
-    setTiming("09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly");
-    setDescription(
-      "Dynamite HRMS is an enterprise-tier cloud workforce intelligence and governance platform designed for high-scale organizations across APAC and global territories."
-    );
-    setRulesRegulations(
-      "1. Strict Zero-Tolerance Policy for Workplace Harassment and Discrimination.\n2. Mandatory Attendance Compliance clocked with precision.\n3. Proprietary IP & Non-Disclosure: All algorithmic assets, source code, and enterprise secrets are strictly confidential.\n4. Minimum 48-Hour Notice Policy for scheduled time off.\n5. Robust Device Security and mandatory multi-factor authentication compliance."
-    );
-
-    setCompanyLogo("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&auto=format&fit=crop&q=80");
-    setCompanyImages(DEFAULT_DEMO_IMAGES);
-
-    setBranches([
-      {
-        id: "branch-blr-01",
-        branchCompanyId: "CMP-BLR-001",
-        branchName: "Bangalore Global Technology HQ",
-        branchCode: "BLR-01",
-        branchType: "headquarters",
-        isHeadquarters: true,
-        address: "Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road",
-        city: "Bangalore",
-        state: "Karnataka",
-        country: "India",
-        postalCode: "560103",
-        phone: "+91 80 4123 4567",
-        email: "blr.hq@weardynamite.com",
-        gstin: "29AABCU9603R1ZM",
-        branchHeadName: "Shivanshu Mishra",
-      },
-      {
-        id: "branch-bom-02",
-        branchCompanyId: "CMP-BOM-002",
-        branchName: "Mumbai Commercial & Executive Hub",
-        branchCode: "BOM-02",
-        branchType: "regional",
-        isHeadquarters: false,
-        address: "One BKC, 8th Floor, G Block, Bandra Kurla Complex",
-        city: "Mumbai",
-        state: "Maharashtra",
-        country: "India",
-        postalCode: "400051",
-        phone: "+91 22 6123 7890",
-        email: "mumbai.office@weardynamite.com",
-        gstin: "27AABCU9603R1ZN",
-        branchHeadName: "Pooja Singhania",
-      },
-      {
-        id: "branch-hyd-03",
-        branchCompanyId: "CMP-HYD-003",
-        branchName: "Hyderabad Cyber Innovation Center",
-        branchCode: "HYD-03",
-        branchType: "rnd",
-        isHeadquarters: false,
-        address: "Cyber Gateway, Level 5, HITEC City, Madhapur",
-        city: "Hyderabad",
-        state: "Telangana",
-        country: "India",
-        postalCode: "500081",
-        phone: "+91 40 4987 6543",
-        email: "hyd.rd@weardynamite.com",
-        gstin: "36AABCU9603R1ZO",
-        branchHeadName: "Ananya Rao",
-      },
-    ]);
-
-    setSuperAdminEmail("superadmin@weardynamite.com");
-    setSuperAdminPassword("password123");
-
-    setAgreeRules(true);
-    setAgreeStatutory(true);
-    setAgreeTerms(true);
-    setAgreeAuth(true);
   };
 
   // Image Upload Handlers
@@ -324,9 +213,9 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
       ...prev,
       {
         id: `branch-${Date.now()}`,
-        branchCompanyId: `CMP-LOC-00${num}`,
-        branchName: `Regional Office #${num}`,
-        branchCode: `LOC-0${num}`,
+        branchCompanyId: "",
+        branchName: "",
+        branchCode: "",
         branchType: "branch",
         isHeadquarters: false,
         address: "",
@@ -396,13 +285,13 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
         setError("COO name is required");
         return false;
       }
-      if (boardMembers.length === 0 || !boardMembers[0].name.trim()) {
-        setError("At least 1 board member is required");
+      if (boardMembers.length === 0 || !boardMembers[0].name.trim() || !boardMembers[0].designation.trim()) {
+        setError("At least 1 board member with name and designation is required");
         return false;
       }
     } else if (step === 3) {
       if (!timing.trim()) {
-        setError("Shift timing and hours are required");
+        setError("Shift timing and operating hours are required");
         return false;
       }
       if (!description.trim() || description.trim().length < 20) {
@@ -415,7 +304,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
       }
     } else if (step === 4) {
       if (!companyLogo.trim()) {
-        setError("Company Logo is required (Upload or enter image URL)");
+        setError("Company Logo is required (Upload file or enter image URL)");
         return false;
       }
       if (companyImages.length < 5) {
@@ -428,7 +317,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
         return false;
       }
       const hq = branches[0];
-      if (!hq.branchName.trim() || !hq.city.trim() || !hq.state.trim() || !hq.phone.trim()) {
+      if (!hq.branchName.trim() || !hq.branchCode.trim() || !hq.city.trim() || !hq.state.trim() || !hq.phone.trim()) {
         setError("Please complete all required fields for Primary Headquarters");
         return false;
       }
@@ -450,6 +339,10 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
   // Final Form Submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!superAdminPassword.trim() || superAdminPassword.trim().length < 6) {
+      setError("Please set a secure Super Admin password (minimum 6 characters).");
+      return;
+    }
     if (!agreeRules || !agreeStatutory || !agreeTerms || !agreeAuth) {
       setError("Please check and accept all 4 statutory and compliance certifications to proceed.");
       return;
@@ -459,13 +352,14 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
     setError(null);
 
     try {
+      const targetAdminEmail = (superAdminEmail.trim() || email.trim()).toLowerCase();
       const payload = {
         companyName: companyName.trim(),
         businessSector: selectedSector,
         businessCategory: selectedCategory,
         gstNumber: gstNumber.trim().toUpperCase(),
         panNumber: panNumber.trim().toUpperCase(),
-        registrationNumber: registrationNumber.trim() || `CIN-${Date.now()}`,
+        registrationNumber: registrationNumber.trim(),
         mobileNumber: mobileNumber.trim(),
         email: email.trim().toLowerCase(),
         websiteLink: websiteLink.trim(),
@@ -480,10 +374,10 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
         timing: timing.trim(),
         description: description.trim(),
         rulesRegulations: rulesRegulations.trim(),
-        superAdminEmail: (superAdminEmail.trim() || email.trim()).toLowerCase(),
-        superAdminPassword: superAdminPassword || "password123",
-        branches: branches.map((b) => ({
-          id: b.id || `branch-${Date.now()}`,
+        superAdminEmail: targetAdminEmail,
+        superAdminPassword: superAdminPassword.trim(),
+        branches: branches.map((b, index) => ({
+          id: b.id || `branch-${Date.now()}-${index}`,
           code: b.branchCode.trim().toUpperCase(),
           name: b.branchName.trim(),
           branchType: b.branchType,
@@ -543,10 +437,10 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-600 text-white shadow-xs">
-                  Statutory Incorporator
+                  Enterprise Incorporator
                 </span>
                 <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                  17 Enterprise Corporate Fields
+                  Direct Live Database Provisioning
                 </span>
               </div>
               <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mt-0.5">
@@ -555,22 +449,12 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
             </div>
           </div>
 
-          <div className="flex items-center space-x-2.5">
-            <button
-              type="button"
-              onClick={handleFillDemoData}
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-indigo-600 to-purple-600 text-white text-xs font-bold shadow-md hover:opacity-95 transition-all cursor-pointer active:scale-95"
-            >
-              <Sparkles className="w-4 h-4 text-amber-200" />
-              <span>⚡ 1-Click Demo Prefill</span>
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors self-end sm:self-auto"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Stepper Progress Bar */}
@@ -709,15 +593,12 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                     <span>Legal Identity & Operating Industry Classification</span>
                   </div>
 
-                  {/* Business Sector & Category Selector */}
+                  {/* Dynamic Sector Selector */}
                   <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/50 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-indigo-900 dark:text-indigo-300 flex items-center space-x-1.5">
                         <Globe className="w-3.5 h-3.5" />
-                        <span>Adaptive Sector Configuration (50 Enterprise Domains)</span>
-                      </span>
-                      <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-indigo-200 dark:bg-indigo-900/80 text-indigo-800 dark:text-indigo-200">
-                        {allSectors.length} Sectors Available
+                        <span>Adaptive Sector Configuration ({allSectors.length} Sectors Available)</span>
                       </span>
                     </div>
 
@@ -763,7 +644,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder="e.g. Dynamite Technologies Private Limited"
+                        placeholder="Enter full registered corporate name"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -776,7 +657,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         maxLength={15}
                         value={gstNumber}
                         onChange={(e) => setGstNumber(e.target.value.toUpperCase())}
-                        placeholder="29AABCU9603R1ZM"
+                        placeholder="e.g. 29AAAAA0000A1Z5"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -789,18 +670,18 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         maxLength={10}
                         value={panNumber}
                         onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
-                        placeholder="AABCU9603R"
+                        placeholder="e.g. AAAAA0000A"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono uppercase focus:outline-none focus:border-indigo-500"
                       />
                     </div>
 
                     <div className="space-y-1">
-                      <label className="font-semibold text-slate-700 dark:text-slate-300">Registration Number / CIN</label>
+                      <label className="font-semibold text-slate-700 dark:text-slate-300">Registration Number / CIN (Optional)</label>
                       <input
                         type="text"
                         value={registrationNumber}
                         onChange={(e) => setRegistrationNumber(e.target.value)}
-                        placeholder="CIN-U72200KA2026PTC123456"
+                        placeholder="e.g. U72200KA2026PTC000000"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -814,7 +695,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           required
                           value={mobileNumber}
                           onChange={(e) => setMobileNumber(e.target.value)}
-                          placeholder="+91 98765 43210"
+                          placeholder="e.g. +91 98000 00000"
                           className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
@@ -829,7 +710,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           required
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          placeholder="contact@weardynamite.com"
+                          placeholder="corporate@yourcompany.com"
                           className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
@@ -844,7 +725,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           required
                           value={websiteLink}
                           onChange={(e) => setWebsiteLink(e.target.value)}
-                          placeholder="https://weardynamite.com"
+                          placeholder="https://yourcompany.com"
                           className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
@@ -859,7 +740,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           required
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          placeholder="Dynamite Tower, 4th Floor, Tech Innovation Park, Outer Ring Road, Bangalore, Karnataka - 560103"
+                          placeholder="Street, Building, Area, City, State - PIN"
                           className="w-full pl-9 pr-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                         />
                       </div>
@@ -873,7 +754,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                 <div className="space-y-5 animate-in fade-in duration-200">
                   <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider pb-2 border-b border-slate-100 dark:border-slate-800">
                     <Users className="w-4 h-4" />
-                    <span>Executive Leadership & Board of Governance (5 Mandatory Leadership Fields)</span>
+                    <span>Executive Leadership & Board of Governance</span>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
@@ -884,7 +765,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={directorName}
                         onChange={(e) => setDirectorName(e.target.value)}
-                        placeholder="e.g. Shivanshu Mishra"
+                        placeholder="Enter Managing Director's name"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -896,7 +777,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={ceoName}
                         onChange={(e) => setCeoName(e.target.value)}
-                        placeholder="e.g. Vikram Malhotra"
+                        placeholder="Enter Chief Executive Officer's name"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -908,7 +789,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={ctoName}
                         onChange={(e) => setCtoName(e.target.value)}
-                        placeholder="e.g. Ananya Rao"
+                        placeholder="Enter Chief Technology Officer's name"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -920,7 +801,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={cooName}
                         onChange={(e) => setCooName(e.target.value)}
-                        placeholder="e.g. Rajesh Nambiar"
+                        placeholder="Enter Chief Operating Officer's name"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -963,7 +844,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           <input
                             type="text"
                             required
-                            placeholder="Governance Designation"
+                            placeholder="Board Designation"
                             value={member.designation}
                             onChange={(e) => {
                               const updated = [...boardMembers];
@@ -1006,7 +887,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={timing}
                         onChange={(e) => setTiming(e.target.value)}
-                        placeholder="09:00 AM - 06:30 PM (Mon-Fri) | 45 Hours Weekly"
+                        placeholder="e.g. 09:30 AM - 06:30 PM (Mon-Fri) | 40 Hours Flexible"
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                     </div>
@@ -1020,7 +901,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Provide a comprehensive profile of company operations, vision, and core industry..."
+                        placeholder="Enter a detailed overview of company operations, vision, and core industry..."
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
                       />
                       <span className="text-[10px] text-slate-400">Min 20 characters</span>
@@ -1035,7 +916,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         required
                         value={rulesRegulations}
                         onChange={(e) => setRulesRegulations(e.target.value)}
-                        placeholder="Enter workplace code of conduct, non-disclosure, attendance policies, and compliance norms..."
+                        placeholder="Enter workplace code of conduct, non-disclosure agreements, attendance policies, and compliance norms..."
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white font-mono focus:outline-none focus:border-indigo-500"
                       />
                       <span className="text-[10px] text-slate-400">Min 20 characters</span>
@@ -1086,11 +967,11 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           />
                           <div>
                             <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                              Corporate Logo Attached
+                              Corporate Logo Ready
                             </span>
                             <span className="text-[10px] text-emerald-500 font-semibold flex items-center space-x-1">
                               <CheckCircle2 className="w-3 h-3" />
-                              <span>Ready for Database & Dossier PDF</span>
+                              <span>Ready for Database Persistence</span>
                             </span>
                           </div>
                         </div>
@@ -1105,7 +986,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                     ) : showLogoUrlInput ? (
                       <input
                         type="url"
-                        placeholder="https://images.unsplash.com/... (image URL)"
+                        placeholder="Paste image URL (https://...)"
                         value={companyLogo}
                         onChange={(e) => setCompanyLogo(e.target.value)}
                         className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white text-xs focus:outline-none focus:border-indigo-500"
@@ -1143,7 +1024,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                         Select Workplace & Campus Photos
                       </span>
                       <span className="text-[10px] text-slate-400">
-                        Upload 5 or more photos (Offices, Reception, Boardrooms, Labs)
+                        Upload 5 or more photos (Offices, Reception, Boardrooms, Facilities)
                       </span>
                       <input type="file" multiple accept="image/*" className="hidden" onChange={handleFacilityUpload} />
                     </label>
@@ -1152,7 +1033,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                       <div className="flex space-x-2 text-xs">
                         <input
                           type="url"
-                          placeholder="https://images.unsplash.com/... (paste image link)"
+                          placeholder="Paste image URL (https://...)"
                           value={newImageUrl}
                           onChange={(e) => setNewImageUrl(e.target.value)}
                           className="flex-1 px-3.5 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500"
@@ -1216,7 +1097,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
                     <div className="flex items-center space-x-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
                       <MapPin className="w-4 h-4" />
-                      <span>Corporate Multi-Branch Network ({branches.length} Registered)</span>
+                      <span>Corporate Multi-Branch Network ({branches.length} Configured)</span>
                     </div>
                     <button
                       type="button"
@@ -1255,7 +1136,6 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                                 {b.branchType}
                               </span>
                             )}
-                            <span className="font-mono text-[10px] text-indigo-500 font-bold">[{b.branchCompanyId}]</span>
                           </div>
 
                           {!b.isHeadquarters && branches.length > 1 && (
@@ -1276,6 +1156,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="e.g. BR-001"
                               value={b.branchCompanyId}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1291,6 +1172,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="Branch office title"
                               value={b.branchName}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1306,6 +1188,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="e.g. HQ-01"
                               value={b.branchCode}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1321,6 +1204,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="Branch physical address"
                               value={b.address}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1336,6 +1220,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="City"
                               value={b.city}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1351,6 +1236,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <input
                               type="text"
                               required
+                              placeholder="State / Province"
                               value={b.state}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1362,10 +1248,26 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                           </div>
 
                           <div className="space-y-1">
+                            <label className="text-[10px] font-bold text-slate-500 uppercase">Postal Code</label>
+                            <input
+                              type="text"
+                              placeholder="PIN / Postal Code"
+                              value={b.postalCode}
+                              onChange={(e) => {
+                                const up = [...branches];
+                                up[idx].postalCode = e.target.value;
+                                setBranches(up);
+                              }}
+                              className="w-full px-3 py-1.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
                             <label className="text-[10px] font-bold text-slate-500 uppercase">Contact Phone *</label>
                             <input
                               type="text"
                               required
+                              placeholder="Branch contact phone"
                               value={b.phone}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1380,6 +1282,7 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                             <label className="text-[10px] font-bold text-slate-500 uppercase">Branch Head Name</label>
                             <input
                               type="text"
+                              placeholder="Branch manager name"
                               value={b.branchHeadName || ""}
                               onChange={(e) => {
                                 const up = [...branches];
@@ -1404,10 +1307,6 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                       <ShieldCheck className="w-4 h-4" />
                       <span>Review Registration Dossier & Legal Certification</span>
                     </div>
-                    <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center space-x-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>All 5 Prior Sections Verified</span>
-                    </span>
                   </div>
 
                   {/* Summary Cards */}
@@ -1504,12 +1403,12 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
                       </div>
 
                       <div className="text-[11px] text-slate-500">
-                        Board Members: {boardMembers.map((b) => b.name).filter(Boolean).join(", ")}
+                        Board Members: {boardMembers.map((b) => b.name).filter(Boolean).join(", ") || "—"}
                       </div>
                     </div>
                   </div>
 
-                  {/* Super Admin Credentials Setup */}
+                  {/* Super Admin Credentials Configuration */}
                   <div className="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200 dark:border-indigo-900/60 space-y-3">
                     <div className="flex items-center space-x-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 uppercase">
                       <KeyRound className="w-3.5 h-3.5" />
@@ -1518,27 +1417,28 @@ export function RegisterCompanyModal({ isOpen, onClose, onSuccess }: Props) {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                       <div className="space-y-1">
-                        <label className="font-semibold text-slate-700 dark:text-slate-300">Super Admin Login Email</label>
+                        <label className="font-semibold text-slate-700 dark:text-slate-300">Super Admin Login Email *</label>
                         <input
                           type="email"
+                          required
                           placeholder={email || "superadmin@domain.com"}
                           value={superAdminEmail}
                           onChange={(e) => setSuperAdminEmail(e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl"
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white"
                         />
-                        <span className="text-[10px] text-slate-400">Defaults to corporate email if empty</span>
+                        <span className="text-[10px] text-slate-400">Defaults to corporate email ({email || "..."}) if empty</span>
                       </div>
 
                       <div className="space-y-1">
-                        <label className="font-semibold text-slate-700 dark:text-slate-300">Initial Password</label>
+                        <label className="font-semibold text-slate-700 dark:text-slate-300">Initial Password * (Min 6 chars)</label>
                         <input
-                          type="text"
+                          type="password"
                           required
+                          placeholder="Enter a secure root password"
                           value={superAdminPassword}
                           onChange={(e) => setSuperAdminPassword(e.target.value)}
-                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-mono"
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl font-mono text-slate-900 dark:text-white"
                         />
-                        <span className="text-[10px] text-slate-400">Default: password123</span>
                       </div>
                     </div>
                   </div>

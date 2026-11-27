@@ -24,12 +24,12 @@ export const adminService = {
         timestamp: d.timestamp || new Date().toISOString(),
         latencyMs: elapsed,
       };
-    } catch {
+    } catch (err: any) {
       return {
-        relationalSQL: "PostgreSQL (Supabase Active)",
-        noSQLDocument: "MongoDB Atlas (Connected)",
-        inMemoryCache: "In-Memory / Redis",
-        status: "healthy",
+        relationalSQL: "PostgreSQL (Unavailable)",
+        noSQLDocument: "MongoDB Atlas (Unavailable)",
+        inMemoryCache: "Cache Store (Unavailable)",
+        status: "degraded",
         timestamp: new Date().toISOString(),
         latencyMs: Math.round(performance.now() - start),
       };

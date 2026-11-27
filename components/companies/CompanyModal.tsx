@@ -97,7 +97,7 @@ export function CompanyModal({ company, onClose }: Props) {
                 </div>
                 <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-800">
                   <span className="text-slate-400 block mb-1">Registration CIN</span>
-                  <span className="font-semibold text-slate-200 font-mono">{company.registrationNumber || "CIN-REG-2026"}</span>
+                  <span className="font-semibold text-slate-200 font-mono">{company.registrationNumber || "—"}</span>
                 </div>
                 <div className="bg-slate-800/50 p-3 rounded-lg border border-slate-800">
                   <span className="text-slate-400 block mb-1">Corporate Email</span>
