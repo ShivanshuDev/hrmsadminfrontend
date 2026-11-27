@@ -18,7 +18,15 @@ export const authService = {
     });
 
     const data = res.data?.data;
-    if (data?.token) {
+    if (data?.token && data?.user) {
+      const role = (data.user.role || "").toLowerCase();
+      // Enforce that only platform administrators can access HRMS Admin
+      if (role !== "platform_admin" && role !== "super_admin") {
+        throw new Error(
+          "Access Restricted: This portal is exclusively reserved for Platform Super Administrators. Tenant and company employees must sign in via the Client HRMS Portal."
+        );
+      }
+
       if (typeof window !== "undefined") {
         localStorage.setItem("hrms_superadmin_token", data.token);
         localStorage.setItem("hrms_superadmin_user", JSON.stringify(data.user));

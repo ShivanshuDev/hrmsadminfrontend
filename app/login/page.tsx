@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Mail, Lock, Loader2, KeyRound, AlertCircle } from "lucide-react";
+import { ShieldCheck, Mail, Lock, Loader2, KeyRound, AlertCircle, Sparkles } from "lucide-react";
 import { authService } from "@/services/auth.service";
 
 export default function LoginPage() {
@@ -27,21 +27,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center p-6 text-slate-100">
-      <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center p-4 sm:p-6 text-slate-800 dark:text-slate-100 transition-colors">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-7 sm:p-8 shadow-2xl shadow-slate-900/10 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-emerald-400 mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/20 mb-3">
-            <ShieldCheck className="w-6 h-6 text-white" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 mx-auto flex items-center justify-center shadow-xl shadow-indigo-600/30 mb-3">
+            <ShieldCheck className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">DYNAMITE HRMS</h1>
-          <p className="text-xs text-indigo-400 font-semibold tracking-wider uppercase">Super Admin Portal Gateway</p>
-          <p className="text-xs text-slate-400">Authenticating directly against Supabase PostgreSQL and MongoDB Atlas.</p>
+          <div className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold uppercase tracking-wider">
+            <Sparkles className="w-3 h-3 text-amber-500" />
+            <span>Platform Super Admin Portal</span>
+          </div>
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            Dynamite HRMS Admin
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            Authorized root administrator credentials required. Company employees and tenant staff must sign in via the Client HRMS Portal.
+          </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-rose-950/60 border border-rose-800/60 rounded-xl flex items-center space-x-2 text-rose-300 text-xs">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 rounded-xl flex items-start space-x-2.5 text-rose-600 dark:text-rose-300 text-xs font-semibold leading-relaxed">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
@@ -49,7 +56,9 @@ export default function LoginPage() {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Corporate Email</label>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Platform Admin Email
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -57,14 +66,16 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter Super Admin Email"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="superadmin@dynamitehrms.admin"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Access Key / Password</label>
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+              Access Key / Root Password
+            </label>
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
@@ -72,8 +83,8 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter Root Password"
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                placeholder="••••••••••••"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium font-mono"
               />
             </div>
           </div>
@@ -81,12 +92,18 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition-all shadow-lg shadow-indigo-600/25 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer"
+            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center space-x-2 disabled:opacity-50 cursor-pointer active:scale-98"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <KeyRound className="w-4 h-4" />}
-            <span>{loading ? "Authenticating..." : "Authenticate as Super Admin"}</span>
+            <span>{loading ? "Verifying Root Authorization..." : "Authenticate as Platform Admin"}</span>
           </button>
         </form>
+
+        <div className="pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+          <p className="text-[11px] text-slate-400">
+            Protected by End-to-End JWT Session Signatures & Dual-DB Isolation.
+          </p>
+        </div>
       </div>
     </div>
   );

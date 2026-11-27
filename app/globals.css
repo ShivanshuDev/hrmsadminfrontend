@@ -2,102 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #0f172a;
-  --card-border: #1e293b;
-  --muted: #64748b;
-  --header-bg: rgba(15, 23, 42, 0.9);
-  --sidebar-bg: #0b1120;
-}
+@layer base {
+  :root {
+    --background: #f8fafc;
+    --foreground: #0f172a;
+    --card: #ffffff;
+    --card-border: #e2e8f0;
+    --muted: #64748b;
+  }
 
-html.light {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: #ffffff;
-  --card-border: #e2e8f0;
-  --muted: #64748b;
-  --header-bg: rgba(255, 255, 255, 0.9);
-  --sidebar-bg: #ffffff;
-}
+  html.dark {
+    --background: #090d16;
+    --foreground: #f8fafc;
+    --card: #0f172a;
+    --card-border: #1e293b;
+    --muted: #94a3b8;
+  }
 
-html.light body {
-  background-color: #f1f5f9;
-  color: #0f172a;
-}
-
-html.dark body {
-  background-color: #090d16;
-  color: #f8fafc;
-}
-
-/* Light mode overrides for major container classes */
-html.light .bg-slate-950 {
-  background-color: #f1f5f9 !important;
-}
-
-html.light .bg-slate-900 {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-}
-
-html.light .bg-slate-900\/90 {
-  background-color: rgba(255, 255, 255, 0.92) !important;
-  color: #0f172a !important;
-}
-
-html.light .bg-slate-900\/60 {
-  background-color: rgba(248, 250, 252, 0.8) !important;
-}
-
-html.light .bg-slate-800,
-html.light .bg-slate-800\/80,
-html.light .bg-slate-800\/60,
-html.light .bg-slate-800\/50,
-html.light .bg-slate-800\/40,
-html.light .bg-slate-800\/30 {
-  background-color: #f8fafc !important;
-  color: #0f172a !important;
-}
-
-html.light .border-slate-800,
-html.light .border-slate-800\/60,
-html.light .border-slate-800\/50,
-html.light .border-slate-700,
-html.light .border-slate-700\/60,
-html.light .border-slate-700\/50 {
-  border-color: #e2e8f0 !important;
-}
-
-html.light .text-white {
-  color: #0f172a !important;
-}
-
-html.light .text-slate-100 {
-  color: #1e293b !important;
-}
-
-html.light .text-slate-200 {
-  color: #334155 !important;
-}
-
-html.light .text-slate-300 {
-  color: #475569 !important;
-}
-
-html.light .text-slate-400 {
-  color: #64748b !important;
-}
-
-html.light aside {
-  background-color: #ffffff !important;
-  border-right-color: #e2e8f0 !important;
-}
-
-html.light header {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-bottom-color: #e2e8f0 !important;
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
 
 /* Custom Scrollbars */
@@ -106,10 +32,10 @@ html.light header {
   height: 6px;
 }
 html.dark ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #090d16;
 }
 html.dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #1e293b;
   border-radius: 9999px;
 }
 html.light ::-webkit-scrollbar-track {

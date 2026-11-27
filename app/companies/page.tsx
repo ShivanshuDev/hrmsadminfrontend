@@ -60,21 +60,21 @@ export default function CompaniesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Registered Enterprises</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Registered Enterprises</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Comprehensive registry of all enterprise organizations and operational headquarters.
           </p>
         </div>
 
         <div className="flex items-center space-x-3 text-xs">
-          <span className="px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-slate-300">
-            Total Enterprises: <strong className="text-indigo-400">{companies.length}</strong>
+          <span className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 shadow-2xs font-medium">
+            Total Enterprises: <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{companies.length}</strong>
           </span>
 
           {/* Register Enterprise Button */}
           <button
             onClick={() => setIsRegisterOpen(true)}
-            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 transition-all"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold flex items-center space-x-1.5 shadow-md shadow-indigo-600/25 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Register Enterprise</span>
@@ -83,7 +83,7 @@ export default function CompaniesPage() {
       </div>
 
       {/* Filter, Search & View Mode Switcher */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xs transition-colors">
         <div className="flex items-center gap-3 w-full md:w-auto flex-1">
           {/* Search Box */}
           <div className="relative flex-1">
@@ -93,7 +93,7 @@ export default function CompaniesPage() {
               placeholder="Search by company name, GSTIN, or director..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
             />
           </div>
 
@@ -103,7 +103,7 @@ export default function CompaniesPage() {
             <select
               value={selectedSector}
               onChange={(e) => setSelectedSector(e.target.value)}
-              className="bg-slate-800/80 border border-slate-700/60 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"
+              className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
             >
               <option value="all">All Industry Sectors</option>
               {sectors.map((sec) => (
@@ -116,13 +116,13 @@ export default function CompaniesPage() {
         </div>
 
         {/* View Toggle: Cards vs Table */}
-        <div className="flex items-center space-x-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 shrink-0">
+        <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200 dark:border-slate-700/60 shrink-0">
           <button
             onClick={() => setViewMode("cards")}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewMode === "cards"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
             title="Grid Cards View"
           >
@@ -132,10 +132,10 @@ export default function CompaniesPage() {
 
           <button
             onClick={() => setViewMode("table")}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
               viewMode === "table"
-                ? "bg-indigo-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-200"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
             }`}
             title="Data Table View"
           >
@@ -147,11 +147,11 @@ export default function CompaniesPage() {
 
       {/* Main Content Area: Cards or Table */}
       {loading ? (
-        <div className="text-center py-20 text-slate-400 text-sm">
+        <div className="text-center py-20 text-slate-400 text-sm font-medium">
           Loading enterprises from MongoDB Atlas...
         </div>
       ) : filteredCompanies.length === 0 ? (
-        <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm">
+        <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 text-sm">
           No enterprises match your search criteria.
         </div>
       ) : viewMode === "cards" ? (
@@ -160,24 +160,24 @@ export default function CompaniesPage() {
           {filteredCompanies.map((comp) => (
             <div
               key={comp._id || comp.id}
-              className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all flex flex-col justify-between group shadow-sm"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-indigo-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between group shadow-xs"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div>
-                    <h3 className="font-bold text-white text-base group-hover:text-indigo-400 transition-colors line-clamp-1">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1">
                       {comp.companyName}
                     </h3>
-                    <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium bg-slate-800 text-indigo-300 border border-slate-700/60 mt-1">
+                    <span className="inline-block px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-slate-700/60 mt-1">
                       {comp.businessSector.replace(/^\d+\.\s*/, "")}
                     </span>
                   </div>
-                  <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/50 flex items-center justify-center text-slate-300 shrink-0">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center text-slate-500 dark:text-slate-300 shrink-0">
                     <Building2 className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="space-y-2 text-xs text-slate-400 my-4">
+                <div className="space-y-2 text-xs text-slate-500 dark:text-slate-400 my-4">
                   <div className="flex items-center space-x-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="truncate">{comp.address}</span>
@@ -186,23 +186,23 @@ export default function CompaniesPage() {
                     <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                     <span className="truncate">{comp.email}</span>
                   </div>
-                  <div className="flex items-center space-x-2 font-mono text-[11px] text-slate-300">
-                    <span className="text-slate-400 font-sans">GST:</span>
-                    <span>{comp.gstNumber}</span>
+                  <div className="flex items-center space-x-2 font-mono text-[11px] text-slate-700 dark:text-slate-300">
+                    <span className="text-slate-400 font-sans font-medium">GST:</span>
+                    <span className="font-semibold">{comp.gstNumber}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
-                <div className="flex items-center space-x-1.5 text-xs text-slate-300">
-                  <GitBranch className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div className="flex items-center space-x-1.5 text-xs text-slate-600 dark:text-slate-300">
+                  <GitBranch className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                   <span>
-                    <strong className="text-white">{comp.branches?.length || 0}</strong> Branches
+                    <strong className="text-slate-900 dark:text-white font-bold">{comp.branches?.length || 0}</strong> Branches
                   </span>
                 </div>
                 <button
                   onClick={() => setSelectedCompany(comp)}
-                  className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-400 hover:text-white rounded-lg text-xs font-medium transition-colors flex items-center space-x-1"
+                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white rounded-lg text-xs font-bold transition-colors flex items-center space-x-1 border border-slate-200 dark:border-transparent cursor-pointer"
                 >
                   <span>Manage</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -213,59 +213,59 @@ export default function CompaniesPage() {
         </div>
       ) : (
         /* TABLE VIEW */
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-2xs">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-850/60 text-slate-400 font-semibold uppercase text-[10px] tracking-wider">
-                  <th className="py-3 px-5">Enterprise Name</th>
-                  <th className="py-3 px-5">Industry Sector</th>
-                  <th className="py-3 px-5">Tax & CIN</th>
-                  <th className="py-3 px-5">Corporate Contact</th>
-                  <th className="py-3 px-5">Executive Leadership</th>
-                  <th className="py-3 px-5 text-center">Branches</th>
-                  <th className="py-3 px-5 text-right">Action</th>
+                <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850/60 text-slate-500 dark:text-slate-400 font-bold uppercase text-[10px] tracking-wider">
+                  <th className="py-3.5 px-5">Enterprise Name</th>
+                  <th className="py-3.5 px-5">Industry Sector</th>
+                  <th className="py-3.5 px-5">Tax & CIN</th>
+                  <th className="py-3.5 px-5">Corporate Contact</th>
+                  <th className="py-3.5 px-5">Executive Leadership</th>
+                  <th className="py-3.5 px-5 text-center">Branches</th>
+                  <th className="py-3.5 px-5 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {filteredCompanies.map((comp) => (
-                  <tr key={comp._id || comp.id} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={comp._id || comp.id} className="hover:bg-indigo-50/40 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3.5 px-5">
-                      <div className="font-semibold text-white text-sm">{comp.companyName}</div>
-                      <div className="text-[11px] text-slate-400 flex items-center space-x-1 mt-0.5">
+                      <div className="font-bold text-slate-900 dark:text-white text-sm">{comp.companyName}</div>
+                      <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center space-x-1 mt-0.5">
                         <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                         <span className="truncate max-w-[220px]">{comp.address}</span>
                       </div>
                     </td>
 
                     <td className="py-3.5 px-5">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-indigo-300 border border-slate-700">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-slate-700">
                         {comp.businessSector.replace(/^\d+\.\s*/, "")}
                       </span>
                       {comp.businessCategory && (
-                        <div className="text-[10px] text-slate-400 mt-1 max-w-[180px] truncate">
+                        <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 max-w-[180px] truncate">
                           {comp.businessCategory}
                         </div>
                       )}
                     </td>
 
-                    <td className="py-3.5 px-5 font-mono text-slate-300">
-                      <div>GST: <span className="text-white">{comp.gstNumber}</span></div>
+                    <td className="py-3.5 px-5 font-mono text-slate-600 dark:text-slate-300">
+                      <div>GST: <span className="font-bold text-slate-900 dark:text-white">{comp.gstNumber}</span></div>
                       <div className="text-[10px] text-slate-400">PAN: {comp.panNumber}</div>
                     </td>
 
-                    <td className="py-3.5 px-5 text-slate-300">
-                      <div className="truncate max-w-[180px]">{comp.email}</div>
+                    <td className="py-3.5 px-5 text-slate-700 dark:text-slate-300">
+                      <div className="truncate max-w-[180px] font-medium">{comp.email}</div>
                       <div className="text-[10px] text-slate-400">{comp.mobileNumber}</div>
                     </td>
 
-                    <td className="py-3.5 px-5 text-slate-300">
-                      <div className="font-medium text-white">{comp.directorName || comp.ceoName}</div>
+                    <td className="py-3.5 px-5 text-slate-700 dark:text-slate-300">
+                      <div className="font-bold text-slate-900 dark:text-white">{comp.directorName || comp.ceoName}</div>
                       <div className="text-[10px] text-slate-400">CEO / Managing Director</div>
                     </td>
 
                     <td className="py-3.5 px-5 text-center">
-                      <span className="px-2.5 py-0.5 bg-indigo-950/80 text-indigo-400 border border-indigo-800/40 rounded-full font-bold text-xs">
+                      <span className="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/40 rounded-full font-bold text-xs">
                         {comp.branches?.length || 0}
                       </span>
                     </td>
@@ -273,7 +273,7 @@ export default function CompaniesPage() {
                     <td className="py-3.5 px-5 text-right">
                       <button
                         onClick={() => setSelectedCompany(comp)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-400 hover:text-white rounded-lg text-xs font-medium transition-colors"
+                        className="px-3 py-1.5 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-white rounded-lg text-xs font-bold transition-colors border border-slate-200 dark:border-transparent cursor-pointer"
                       >
                         Details
                       </button>

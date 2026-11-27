@@ -35,12 +35,12 @@ export default function NotificationsPage() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case "high":
-        return "bg-rose-950/80 text-rose-400 border-rose-800/40";
+        return "bg-rose-50 dark:bg-rose-950/80 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-800/40";
       case "medium":
-        return "bg-amber-950/80 text-amber-400 border-amber-800/40";
+        return "bg-amber-50 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800/40";
       case "low":
       default:
-        return "bg-slate-800 text-slate-300 border-slate-700";
+        return "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700";
     }
   };
 
@@ -49,20 +49,20 @@ export default function NotificationsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Corporate Broadcasts & Notices</h1>
-          <p className="text-sm text-slate-400">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Corporate Broadcasts & Notices</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             Real-time company announcements, policy updates, and emergency notices from MongoDB Atlas.
           </p>
         </div>
         <div className="flex items-center space-x-2 text-xs">
-          <span className="px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg text-slate-300">
-            Broadcasts: <strong className="text-indigo-400">{announcements.length}</strong>
+          <span className="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-700 dark:text-slate-300 font-medium shadow-2xs">
+            Broadcasts: <strong className="text-indigo-600 dark:text-indigo-400 font-bold">{announcements.length}</strong>
           </span>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col md:flex-row items-center gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center gap-4 shadow-2xs transition-colors">
         <div className="relative flex-1 w-full">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
@@ -70,7 +70,7 @@ export default function NotificationsPage() {
             placeholder="Search announcement subject, content, or author..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-800/80 border border-slate-700/60 rounded-lg text-xs text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 transition-colors"
           />
         </div>
 
@@ -78,7 +78,7 @@ export default function NotificationsPage() {
           <select
             value={selectedPriority}
             onChange={(e) => setSelectedPriority(e.target.value)}
-            className="bg-slate-800/80 border border-slate-700/60 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 w-full md:w-auto"
+            className="bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 w-full md:w-auto transition-colors"
           >
             <option value="all">All Priorities</option>
             <option value="high">High / Urgent</option>
@@ -90,11 +90,11 @@ export default function NotificationsPage() {
 
       {/* Announcements Feed */}
       {loading ? (
-        <div className="text-center py-20 text-slate-400 text-sm">
+        <div className="text-center py-20 text-slate-500 dark:text-slate-400 text-sm font-medium">
           Loading broadcast communications from MongoDB Atlas...
         </div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-16 bg-slate-900 border border-slate-800 rounded-xl text-slate-400 text-sm">
+        <div className="text-center py-16 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-slate-500 dark:text-slate-400 text-sm">
           No announcements found.
         </div>
       ) : (
@@ -102,25 +102,25 @@ export default function NotificationsPage() {
           {filtered.map((item) => (
             <div
               key={item._id || item.id}
-              className="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-all shadow-sm"
+              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 hover:border-indigo-300 dark:hover:border-slate-700 transition-all shadow-2xs"
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-2">
                 <div className="flex items-start space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-600/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5">
                     <Bell className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-base">{item.title}</h3>
-                    <div className="flex items-center space-x-3 text-xs text-slate-400 mt-1">
-                      <span>Author: <strong className="text-slate-300">{item.author}</strong></span>
-                      <span>Category: <strong className="text-indigo-400">{item.category}</strong></span>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base">{item.title}</h3>
+                    <div className="flex items-center space-x-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      <span>Author: <strong className="text-slate-800 dark:text-slate-300">{item.author}</strong></span>
+                      <span>Category: <strong className="text-indigo-600 dark:text-indigo-400">{item.category}</strong></span>
                       <span>Date: {formatDate(item.date || item.createdAt || Date.now())}</span>
                     </div>
                   </div>
                 </div>
 
                 <span
-                  className={`self-start px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border ${getPriorityBadge(
+                  className={`self-start px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${getPriorityBadge(
                     item.priority
                   )}`}
                 >
@@ -128,7 +128,7 @@ export default function NotificationsPage() {
                 </span>
               </div>
 
-              <p className="text-xs text-slate-300 bg-slate-800/40 p-3.5 rounded-lg border border-slate-800/60 mt-3 leading-relaxed">
+              <p className="text-xs text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800/60 mt-3 leading-relaxed">
                 {item.content}
               </p>
             </div>
